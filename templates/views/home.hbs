@@ -1,0 +1,181 @@
+<html>
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" 
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" 
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    </head>
+
+    <body>
+        Home Page
+
+        <form action="/upload-audio" enctype="multipart/form-data" method="POST" id="formAudio">
+            <input type="file" name="audioStream"> Upload Audio file
+        </form>
+            <button type="button" id="button">Submit button</button>
+        
+
+        <br>
+
+        Current Alarm Playing: {{alarm.name}}
+
+        <br>
+
+        <audio controls>
+            <source src="/uploads/{{alarm.name}}" type="audio/mp3">
+        </audio>
+        
+        <button onclick="playAlarm()">
+            Test Alarm
+        </button>
+
+        <button onclick="stopAlarm()">
+            Stop Alarm
+        </button>
+
+        <br>
+
+        <div class="modal fade" id="reminderModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reminder</h5>
+
+                </div>
+                <div class="modal-body" >
+                    <div id="modal-text">
+                        ..
+                    </div>
+                    <img class="img-responsive" style="margin:0 auto; max-width: 100%;" src="images/Untitled.png" alt="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok!</button>
+                </div>
+                </div>
+            </div>
+        </div>
+
+            <button onclick="loadModal()">click me modal</button>
+
+            <script>
+                function loadModal() {
+                    $("#reminderModal").modal('show')
+                }
+            </script>
+    </body>
+
+<script>
+    let alarm = new Audio(`/uploads/{{alarm.name}}`);
+
+    function playAlarm() {
+        alarm.play();
+    }
+    
+    function stopAlarm() {
+        alarm.pause();
+    }
+
+
+</script>
+
+
+
+<script>
+    document.getElementById("button").addEventListener("click", function(e) {
+        document.getElementById("formAudio").submit()
+    })
+</script>
+
+<script>
+    var reminderArray = []
+    var reminders = `{{{reminders}}}`
+    var arrayOfReminders = reminders.split("__v: 0")
+    arrayOfReminders.pop()
+
+    arrayOfReminders.forEach((reminder) => {
+        var day1 = reminder.indexOf("[")
+        var day2 = reminder.indexOf("]")
+        var days = reminder.substring(day1+2,day2-1)
+        reminder = reminder.substring(day2+2)
+
+        var id = reminder.indexOf(",")
+        reminder = reminder.substring(id+1)
+        var reminderText1 = reminder.indexOf("'")
+        reminder = reminder.substring(reminderText1)
+
+        var reminderText2 = reminder.indexOf("'")
+        reminder = reminder.substring(reminderText2 + 1)
+
+        var reminderText3 = reminder.indexOf("'")
+        var reminderText = reminder.substring(reminderText2, reminderText3)
+        
+        reminder = reminder.substring(reminderText3 + 2)
+        var image1 = reminder.indexOf("'")
+        var image2 = reminder.indexOf(",")
+        image = reminder.substring(image1 + 1,image2 - 1)
+        
+        reminder = reminder.substring(image2 +1)
+        time1 = reminder.indexOf("'")
+        time2 = reminder.indexOf(",")
+        time = reminder.substring(time1+1,time2 -1)
+        reminderArray.push([days,reminderText,image,time])
+    })
+
+
+setInterval(function() {checkAlarm()}, 45000)
+
+
+
+
+
+
+    function checkAlarm() {
+        var currentDate = new Date();
+        var currentDay = currentDate.getDay()
+        var currentHour = currentDate.getHours()
+        var currentMinute = currentDate.getMinutes()
+        console.log("day:" , currentDay)
+        console.log("hour:", currentHour)
+        console.log("minute:" , currentMinute)
+
+        reminderArray.forEach(reminder => {
+                //each Array
+                var tempDays = reminder[0].split(",")
+                tempDays.forEach(day => {
+                    if (currentDay == day[0] || currentDay == day[1]) {
+                        if (currentHour == reminder[3].split(".")[0] && currentMinute == reminder[3].split(".")[1]) {
+                            console.log("MATCHED!")
+                            console.log("day:" , day[0] , day[1])
+                            console.log("hour:", reminder[3].split(".")[0])
+                            console.log("minute:" , reminder[3].split(".")[1])
+
+                            var text = document.getElementById("modal-text")
+                            text.innerHTML = reminder[1]
+                            $("#reminderModal").modal('show')
+
+                        }  else {
+                            console.log("MATCH FAIL!")
+                            console.log("day:" , day[0] , day[1])
+                            console.log("hour:", reminder[3].split(".")[0])
+                            console.log("minute:" , reminder[3].split(".")[1])
+                        }
+                    } else {
+                        console.log("Day doest match current day :(")
+                    }
+                })
+            })
+            console.log("end of function")  
+        }
+</script>
+
+
+</html>
+
+
+
