@@ -11,9 +11,9 @@ const alertSchema = new mongoose.Schema({
         type: String
     },
 
-    day : [{ 
-        type : Number 
-    }],
+    day : { 
+        type : String 
+    },
 
     time : {
         type : String

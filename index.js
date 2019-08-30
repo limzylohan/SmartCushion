@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 var multer  = require('multer');
 const fs = require('fs');
-
+const uuidv1 = require('uuid/v1');
 
 
 require('./helper.js');
@@ -59,12 +59,14 @@ app.set('view engine', 'hbs');
 app.set('views', viewsPath);
 
 
-//parsing middleware
+// parsing middleware
 app.use(express.urlencoded());
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 
 
-
+// var bodyParser = require('body-parser');
+// app.use(bodyParser.json({limit: '50mb'}));
+// app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 
 
@@ -81,7 +83,7 @@ app.get('/', (req, res) => {
         audio = alarm[length-1]
 
     Alert.find({}, function(err, alerts) {
-
+        console.log(alerts)
         res.render('home',  {alarm : audio, reminders : alerts});
     })
     })
@@ -96,14 +98,21 @@ app.get("/getAlerts", (req,res)=> {
 
 app.post("/create-alert", (req, res) => {
     console.log("creating alert")
+    uniqueId = uuidv1();
+    fileName = "public/images/" + uniqueId + ".jpg"
+
+    console.log(fileName)
+    fs.writeFile(fileName, new Buffer(req.body.image, "base64"), function(err) {});
+
+    req.body.image = uniqueId
     const alert = new Alert(req.body)
-    console.log(alert)
+    // console.log(alert)
     alert.save(function (err, alert) {
         if (err) return console.error(err);
         console.log("Alert Saved to collection.");
       }); 
 
-    res.send({"success" : true})
+    res.sendStatus(200)
     
 })
 
@@ -117,8 +126,13 @@ app.post("/upload-audio", upload.single('audioStream'), (req,res) => {
     })
     
 
+// app.get("/test" , (req,res) => { 
+//     res.render("test");
+// })
 
-
+// app.get("/testResponse" , (req,res) => {
+//     res.json({"Test" : "Success"})
+// })
 
 
 
