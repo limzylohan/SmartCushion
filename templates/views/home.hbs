@@ -134,7 +134,7 @@
         <br>
         <h4>Current Uploaded Alarm: <br> {{alarm.name}}</h4>
         <br>
-        <button type="button" class="btn btn-primary" onclick="playAlarn()">Play Alarm</button>
+        <button type="button" class="btn btn-primary" onclick="playAlarm()">Play Alarm</button>
         <button type="button" class="btn btn-primary" onclick="stopAlarm()">Stop Alarm</button>
     </div>
   </article>
@@ -151,10 +151,6 @@
         <div class="modal fade" id="reminderModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">You have received a reminder~!</h2>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
                 <div class="modal-body" >
                     <button type="button" class="btn" id="closeButtonimg" data-dismiss="modal">
                         <img class="img-responsive" id="alertImage" style="margin:0 auto; max-width: 100%;" src="" alt="">
@@ -163,13 +159,15 @@
                 <div id="modal-reminder-text">
                         <h3 id="modal-text">placeholder</h3>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="closeButton" data-dismiss="modal">Ok!</button>
-                </div>
                 </div>
             </div>
         </div>
 
+            <script>
+                document.getElementById("closeButtonimg").addEventListener("click", function(e) {
+                    stopAlarm()
+                })
+            </script>
 
 
             <button onclick="showModal()"></button>
@@ -267,10 +265,8 @@ setInterval(function() {checkAlarm()}, 10000)
         console.log("day:" , currentDay)
         console.log("hour:", currentHour)
         console.log("minute:" , currentMinute)
-
         reminderArray.forEach(reminder => {
                 //each Array
-                console.log("reminder is " + reminder)
                 //checking if day of the week are the same
                 if (currentDay != reminder[0]) {
                     console.log("Day Doesnt Match!")
@@ -289,6 +285,9 @@ setInterval(function() {checkAlarm()}, 10000)
 
 
                 } else {
+                    console.log(currentDay , "vs", reminder[0])
+                    console.log(currentHour, "vs", hour)
+                    console.log(currentMinute , "vs", minute)
                     console.log("Time doesnt Match!")
                 }
                 }
@@ -296,10 +295,6 @@ setInterval(function() {checkAlarm()}, 10000)
         })
     }
 
-
-    let pauseAlarm = document.getElementById("closeButton").addEventListener("click", () =>{
-        stopAlarm();
-    })
     
 </script>
 
